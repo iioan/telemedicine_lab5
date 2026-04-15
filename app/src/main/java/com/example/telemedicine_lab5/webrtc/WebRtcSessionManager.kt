@@ -59,27 +59,6 @@ class WebRtcSessionManager(private val appContext: Context) {
             PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer(),
             PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
             PeerConnection.IceServer.builder("stun:openrelay.metered.ca:80").createIceServer(),
-            // Public demo relay for labs; replace with your own TURN in production.
-            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:80")
-                .setUsername("openrelayproject")
-                .setPassword("openrelayproject")
-                .createIceServer(),
-            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:80?transport=tcp")
-                .setUsername("openrelayproject")
-                .setPassword("openrelayproject")
-                .createIceServer(),
-            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:443")
-                .setUsername("openrelayproject")
-                .setPassword("openrelayproject")
-                .createIceServer(),
-            PeerConnection.IceServer.builder("turn:openrelay.metered.ca:443?transport=tcp")
-                .setUsername("openrelayproject")
-                .setPassword("openrelayproject")
-                .createIceServer(),
-            PeerConnection.IceServer.builder("turns:openrelay.metered.ca:443")
-                .setUsername("openrelayproject")
-                .setPassword("openrelayproject")
-                .createIceServer(),
         )
     }
 
@@ -266,11 +245,7 @@ class WebRtcSessionManager(private val appContext: Context) {
     fun switchCamera() {
         localVideoCapturer?.switchCamera(null)
     }
-
-    fun restartIce() {
-        peerConnection?.restartIce()
-    }
-
+    
     fun hangUp() {
         peerConnection?.close()
         peerConnection = null

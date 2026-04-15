@@ -56,7 +56,7 @@ fun HomeScreen(navController: NavController) {
                 onClick = {
                     navController.navigate(
                         AppRoutes.callRoute(
-                            role = "doctor",
+                            role = "participant",
                             roomId = Uri.encode(roomId),
                             serverUrl = Uri.encode(serverUrl),
                         ),
@@ -65,25 +65,8 @@ fun HomeScreen(navController: NavController) {
                 modifier = Modifier.fillMaxWidth(),
                 enabled = roomId.isNotBlank() && serverUrl.isNotBlank(),
             ) {
-                Text("Start Consultation")
-            }
-
-            Button(
-                onClick = {
-                    navController.navigate(
-                        AppRoutes.callRoute(
-                            role = "patient",
-                            roomId = Uri.encode(roomId),
-                            serverUrl = Uri.encode(serverUrl),
-                        ),
-                    )
-                },
-                modifier = Modifier.fillMaxWidth(),
-                enabled = roomId.isNotBlank() && serverUrl.isNotBlank(),
-            ) {
-                Text("Join as Patient")
+                Text("Join Consultation")
             }
         }
     }
 }
-

@@ -28,6 +28,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +68,7 @@ fun CallScreen(
     var localRenderer by remember { mutableStateOf<SurfaceViewRenderer?>(null) }
     var remoteRenderer by remember { mutableStateOf<SurfaceViewRenderer?>(null) }
 
-    var status by remember { mutableStateOf("Ready") }
+    var status by remember { mutableStateOf("Requesting camera and microphone permissions...") }
     var isMuted by remember { mutableStateOf(false) }
     var isConnected by remember { mutableStateOf(false) }
     var hasRemoteVideo by remember { mutableStateOf(false) }
@@ -75,6 +76,7 @@ fun CallScreen(
     var offerSent by remember { mutableStateOf(false) }
     var isOfferer by remember { mutableStateOf(false) }
     var isRecoveringIce by remember { mutableStateOf(false) }
+    var hasRequestedPermissions by remember { mutableStateOf(false) }
 
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -153,6 +155,18 @@ fun CallScreen(
         }
     }
 
+    LaunchedEffect(Unit) {
+        if (!hasRequestedPermissions) {
+            hasRequestedPermissions = true
+            permissionsLauncher.launch(
+                arrayOf(
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.RECORD_AUDIO,
+                ),
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -183,23 +197,6 @@ fun CallScreen(
                 },
             )
 
-            if (!started) {
-                FloatingActionButton(
-                    onClick = {
-                        permissionsLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.CAMERA,
-                                Manifest.permission.RECORD_AUDIO,
-                            ),
-                        )
-                    },
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(16.dp),
-                ) {
-                    Text("Start")
-                }
-            }
 
             if (started && !hasRemoteVideo) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
