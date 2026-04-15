@@ -57,8 +57,6 @@ class WebRtcSessionManager(private val appContext: Context) {
         return listOf(
             PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer(),
             PeerConnection.IceServer.builder("stun:stun1.l.google.com:19302").createIceServer(),
-            PeerConnection.IceServer.builder("stun:stun2.l.google.com:19302").createIceServer(),
-            PeerConnection.IceServer.builder("stun:openrelay.metered.ca:80").createIceServer(),
         )
     }
 
@@ -112,10 +110,6 @@ class WebRtcSessionManager(private val appContext: Context) {
         ).apply {
             sdpSemantics = PeerConnection.SdpSemantics.UNIFIED_PLAN
             continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY
-            iceTransportsType = PeerConnection.IceTransportsType.ALL
-            bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE
-            rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE
-            tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.ENABLED
         }
 
         peerConnection = peerConnectionFactory.createPeerConnection(

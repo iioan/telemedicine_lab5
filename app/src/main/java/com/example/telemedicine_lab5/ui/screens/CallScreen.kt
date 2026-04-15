@@ -70,13 +70,17 @@ fun CallScreen(
 
     var status by remember { mutableStateOf("Requesting camera and microphone permissions...") }
     var isMuted by remember { mutableStateOf(false) }
-    var isConnected by remember { mutableStateOf(false) }
     var hasRemoteVideo by remember { mutableStateOf(false) }
     var started by remember { mutableStateOf(false) }
     var offerSent by remember { mutableStateOf(false) }
     var isOfferer by remember { mutableStateOf(false) }
     var isRecoveringIce by remember { mutableStateOf(false) }
-    var hasRequestedPermissions by remember { mutableStateOf(false) }
+
+    fun attachRenderersIfReady() {
+        val local = localRenderer ?: return
+        val remote = remoteRenderer ?: return
+        sessionManager.initRenderers(local, remote)
+    }
 
     val permissionsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
@@ -97,7 +101,6 @@ fun CallScreen(
                     signalingClient = signalingClient,
                     sessionManager = sessionManager,
                     onStatusChange = { status = it },
-                    onConnected = { isConnected = it },
                     onRemoteVideo = { hasRemoteVideo = true },
                     onIncomingMessage = { message ->
                         scope.launch {
@@ -121,23 +124,23 @@ fun CallScreen(
                         }
                     },
                     onIceFailed = {
-                        if (!started || isRecoveringIce) {
-                            Unit
-                        } else if (!isOfferer) {
+                        if (!started || isRecoveringIce) return@startSession
+                        if (!isOfferer) {
                             status = "Peer reconnection in progress..."
-                        } else {
-                            scope.launch {
-                                isRecoveringIce = true
-                                runCatching {
-                                    status = "Connection failed, restarting ICE..."
-                                    val restartOffer = sessionManager.createIceRestartOffer()
-                                    signalingClient.sendOffer(roomId, restartOffer.description)
-                                    status = "ICE restart offer sent"
-                                }.onFailure {
-                                    status = "ICE restart error: ${it.message}"
-                                }
-                                isRecoveringIce = false
+                            return@startSession
+                        }
+
+                        scope.launch {
+                            isRecoveringIce = true
+                            runCatching {
+                                status = "Connection failed, restarting ICE..."
+                                val restartOffer = sessionManager.createIceRestartOffer()
+                                signalingClient.sendOffer(roomId, restartOffer.description)
+                                status = "ICE restart offer sent"
+                            }.onFailure {
+                                status = "ICE restart error: ${it.message}"
                             }
+                            isRecoveringIce = false
                         }
                     }
                 )
@@ -156,15 +159,12 @@ fun CallScreen(
     }
 
     LaunchedEffect(Unit) {
-        if (!hasRequestedPermissions) {
-            hasRequestedPermissions = true
-            permissionsLauncher.launch(
-                arrayOf(
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.RECORD_AUDIO,
-                ),
-            )
-        }
+        permissionsLauncher.launch(
+            arrayOf(
+                Manifest.permission.CAMERA,
+                Manifest.permission.RECORD_AUDIO,
+            ),
+        )
     }
 
     Scaffold(
@@ -186,17 +186,15 @@ fun CallScreen(
                 factory = { viewContext ->
                     SurfaceViewRenderer(viewContext).also { renderer ->
                         remoteRenderer = renderer
+                        attachRenderersIfReady()
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
                 update = { renderer ->
-                    if (localRenderer != null && remoteRenderer != null) {
-                        sessionManager.initRenderers(localRenderer!!, remoteRenderer!!)
-                    }
                     remoteRenderer = renderer
+                    attachRenderersIfReady()
                 },
             )
-
 
             if (started && !hasRemoteVideo) {
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -206,6 +204,7 @@ fun CallScreen(
                 factory = { viewContext ->
                     SurfaceViewRenderer(viewContext).also { renderer ->
                         localRenderer = renderer
+                        attachRenderersIfReady()
                     }
                 },
                 modifier = Modifier
@@ -214,23 +213,18 @@ fun CallScreen(
                     .size(width = 120.dp, height = 180.dp)
                     .clip(RoundedCornerShape(12.dp)),
                 update = { renderer ->
-                    if (localRenderer != null && remoteRenderer != null) {
-                        sessionManager.initRenderers(localRenderer!!, remoteRenderer!!)
-                    }
                     localRenderer = renderer
+                    attachRenderersIfReady()
                 },
             )
 
             ControlBar(
                 isMuted = isMuted,
-                enabled = started,
                 onToggleMute = {
                     val isMicEnabled = sessionManager.toggleMute()
                     isMuted = !isMicEnabled
                 },
-                onSwitchCamera = {
-                    sessionManager.switchCamera()
-                },
+                onSwitchCamera = { sessionManager.switchCamera() },
                 onHangUp = {
                     signalingClient.disconnect()
                     sessionManager.hangUp()
@@ -250,7 +244,6 @@ private suspend fun startSession(
     signalingClient: SocketSignalingClient,
     sessionManager: WebRtcSessionManager,
     onStatusChange: (String) -> Unit,
-    onConnected: (Boolean) -> Unit,
     onRemoteVideo: () -> Unit,
     onIncomingMessage: (SignalingMessage) -> Unit,
     onReadyToOffer: () -> Unit,
@@ -264,7 +257,6 @@ private suspend fun startSession(
     sessionManager.createPeerConnection(
         onIceCandidate = { signalingClient.sendCandidate(roomId, it) },
         onConnectionStateChange = { state ->
-            onConnected(state == PeerConnection.PeerConnectionState.CONNECTED)
             if (state == PeerConnection.PeerConnectionState.FAILED) {
                 onIceFailed()
             }
@@ -345,7 +337,6 @@ private suspend fun handleSignalingMessage(
 @Composable
 private fun ControlBar(
     isMuted: Boolean,
-    enabled: Boolean,
     onToggleMute: () -> Unit,
     onSwitchCamera: () -> Unit,
     onHangUp: () -> Unit,
@@ -386,7 +377,7 @@ private fun ControlBar(
             onClick = onSwitchCamera,
             containerColor = Color.White,
             modifier = Modifier.padding(horizontal = 10.dp),
-            ) {
+        ) {
             Icon(
                 imageVector = Icons.Default.Cameraswitch,
                 contentDescription = "Switch camera",
