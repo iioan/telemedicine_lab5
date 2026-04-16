@@ -28,7 +28,6 @@ class SocketSignalingClient {
           .enableReconnection()
           .setReconnectionAttempts(10)
           .setTimeout(10000)
-          .setForceNewConnection()
           .build(),
     );
 
