@@ -39,7 +39,7 @@ cd /Users/ioan/AndroidStudioProjects/telemedicine_lab5
 
 The repository now also contains a Flutter implementation in:
 
-- `/home/runner/work/telemedicine_lab5/telemedicine_lab5/flutter_app`
+- `flutter_app/`
 
 Included in the Flutter module:
 
@@ -55,7 +55,7 @@ Included in the Flutter module:
 Run (when Flutter SDK is installed):
 
 ```bash
-cd /home/runner/work/telemedicine_lab5/telemedicine_lab5/flutter_app
+cd flutter_app
 flutter pub get
 flutter run
 ```

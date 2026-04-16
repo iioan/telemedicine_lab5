@@ -23,8 +23,8 @@
     <key>LSRequiresIPhoneOS</key>
     <true/>
     <key>NSCameraUsageDescription</key>
-    <string>Aplicatia are nevoie de camera pentru consultatia video.</string>
+    <string>The app needs camera access for the video consultation.</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Aplicatia are nevoie de microfon pentru consultatia video.</string>
+    <string>The app needs microphone access for the video consultation.</string>
 </dict>
 </plist>

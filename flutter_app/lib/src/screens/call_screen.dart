@@ -186,7 +186,7 @@ class _CallScreenState extends State<CallScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Consultatie Video Live | ${widget.role} | ${widget.roomId}'),
+        title: Text('Video Consultation | ${widget.role} | ${widget.roomId}'),
       ),
       body: Stack(
         children: [
