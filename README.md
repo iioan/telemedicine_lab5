@@ -35,3 +35,27 @@ cd /Users/ioan/AndroidStudioProjects/telemedicine_lab5
 ./gradlew :app:testDebugUnitTest
 ```
 
+## Flutter implementation (requested lab variant)
+
+The repository now also contains a Flutter implementation in:
+
+- `/home/runner/work/telemedicine_lab5/telemedicine_lab5/flutter_app`
+
+Included in the Flutter module:
+
+- `flutter_webrtc` + `socket_io_client` dependencies
+- Home screen (role, room, signaling URL)
+- Call screen with offer/answer/ICE signaling
+- Local PiP + remote fullscreen video
+- Controls: mute, switch camera, hang up
+- Android and iOS media permissions:
+  - `flutter_app/android/app/src/main/AndroidManifest.xml`
+  - `flutter_app/ios/Runner/Info.plist`
+
+Run (when Flutter SDK is installed):
+
+```bash
+cd /home/runner/work/telemedicine_lab5/telemedicine_lab5/flutter_app
+flutter pub get
+flutter run
+```
