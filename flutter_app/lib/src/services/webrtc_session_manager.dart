@@ -18,7 +18,7 @@ class WebRtcSessionManager {
     return _localStream!;
   }
 
-  Future<void> createPeerConnection({
+  Future<void> initializePeerConnection({
     required void Function(RTCIceCandidate candidate) onIceCandidate,
     required void Function(RTCPeerConnectionState state) onConnectionStateChange,
     required void Function(MediaStream remoteStream) onRemoteStream,

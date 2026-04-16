@@ -52,7 +52,7 @@ class _CallScreenState extends State<CallScreen> {
     _localRenderer.srcObject = local;
 
     setState(() => _status = 'Creating peer connection...');
-    await _sessionManager.createPeerConnection(
+    await _sessionManager.initializePeerConnection(
       onIceCandidate: (candidate) {
         _signalingClient.sendCandidate(
           widget.roomId,
